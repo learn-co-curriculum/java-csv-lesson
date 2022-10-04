@@ -15,7 +15,7 @@ comma to indicate the end of one property and the start of another.
 To explain a CSV file format better, let us revisit our students from the
 `Student` class we looked at earlier!
 
-```plaintext
+```text
 firstName,lastName,letterGrade
 Suzie,Bingham,A
 Dustin,Henderson,B
@@ -91,7 +91,7 @@ public static void main(String[] args) {
 
 This would print:
 
-```plaintext
+```text
 Suzie Bingham has the letter grade A
 ```
 
@@ -105,7 +105,7 @@ We can do so using CSV files! Let's see how to write and read from a CSV.
 Consider the `Student` object we created above, it could be represented as
 follows:
 
-```plaintext
+```text
 Suzie,Bingham,A
 ```
 
@@ -209,6 +209,6 @@ print out `student` to ensure that everything was created correctly. Let's pass
 in the `student.csv` file now through IntelliJ and run the code! The following
 is the output:
 
-```plaintext
+```text
 Suzie Bingham has the letter grade A
 ```
