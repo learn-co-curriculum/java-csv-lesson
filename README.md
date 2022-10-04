@@ -22,7 +22,7 @@ Dustin,Henderson,B
 Mike,Wheeler,C
 ```
 
-Notice in the above, every line is comma-separated and every row is a represents
+Notice in the above, every line is comma-separated and every row represents
 a different grouping. For example, we can read this as "Suzie Bingham has an A;
 Dustin Henderson has a B; and Mike Wheeler has a C."
 
