@@ -2,204 +2,213 @@
 
 ## Learning Goals
 
-- Understand the CSV format
-- Work with the CSV format in Java
+- Understand the CSV format.
+- Work with the CSV format in Java.
 
-## CSV Format
+## What is a CSV?
 
-A "CSV" is a "Comma Separated Values" file, where each line is a grouping of
-properties and each entry on each line is separated by a comma to indicate the
-end of one property and the start of another one.
+Now that we can read and write text files, let's look at a different kind of
+file: a CSV. **Comma Separated Values (CSV) files** take on a format where each
+line is a grouping of properties and each entry on each line is separated by a
+comma to indicate the end of one property and the start of another.
 
-Let's consider a `Person` class:
+To explain a CSV file format better, let us revisit our students from the
+`Student` class we looked at earlier!
+
+```text
+firstName,lastName,letterGrade
+Suzie,Bingham,A
+Dustin,Henderson,B
+Mike,Wheeler,C
+```
+
+Notice in the above, every line is comma-separated and every row represents
+a different grouping. For example, we can read this as "Suzie Bingham has an A;
+Dustin Henderson has a B; and Mike Wheeler has a C."
+
+## Data Persistence
+
+The process of saving your program's data, so it can be used later is called
+**data persistence**. There are many ways to implement data persistence - in this
+lesson, we will focus on file-based data persistence using CSV files.
+
+Let's consider a `Student` class:
 
 ```java
-public class Person {
-    private String firstName;
-    private String lastName;
-    private int birthYear;
-    private int birthMonth;
-    private int birthDay;
+public class Student {
+  private String firstName;
+  private String lastName;
+  private char grade;
 
-    public Person(String firstName, String lastName, int birthYear, int birthMonth, int birthDay) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.birthYear = birthYear;
-        this.birthMonth = birthMonth;
-        this.birthDay = birthDay;
-    }
+  public Student(String firstName, String lastName, char grade) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.grade = grade;
+  }
 
-    public String toString() {
-        StringBuffer personString = new StringBuffer();
-        personString.append("firstName = " + firstName);
-        personString.append("\n");
-        personString.append("lastName = " + lastName);
-        personString.append("\n");
-        personString.append("Birth date = ");
-        personString.append(birthMonth + "/");
-        personString.append(birthDay+ "/");
-        personString.append(birthYear);
-        personString.append("\n");
+  public String getFirstName() {
+    return firstName;
+  }
 
-        return personString.toString();
-    }
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
 
-    public String getFirstName() {
-        return firstName;
-    }
+  public String getLastName() {
+    return lastName;
+  }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
 
-    public String getLastName() {
-        return lastName;
-    }
+  public char getGrade() {
+    return grade;
+  }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+  public void setGrade(char grade) {
+    this.grade = grade;
+  }
 
-    public int getBirthYear() {
-        return birthYear;
-    }
+  @Override
+  public String toString() {
+    return String.format("%s %s has the letter grade %s",
+            firstName,
+            lastName,
+            grade);
+  }
+}
+```
 
-    public void setBirthYear(int birthYear) {
-        this.birthYear = birthYear;
-    }
+If we want to initialize an instance of a `Student`, then we can do so like this:
 
-    public int getBirthMonth() {
-        return birthMonth;
-    }
+```java
+public static void main(String[] args) {
+    Student suzie = new Student("Suzie", "Bingham", 'A');
+    System.out.println(suzie);
+}
+```
 
-    public void setBirthMonth(int birthMonth) {
-        this.birthMonth = birthMonth;
-    }
+This would print:
 
-    public int getBirthDay() {
-        return birthDay;
-    }
+```text
+Suzie Bingham has the letter grade A
+```
 
-    public void setBirthDay(int birthDay) {
-        this.birthDay = birthDay;
+Now what if we want to be able to save the values of each field in the `Student`
+class in a file? Or use this data again to create a `Student` object?
+
+We can do so using CSV files! Let's see how to write and read from a CSV.
+
+## Writing to a CSV File
+
+Consider the `Student` object we created above, it could be represented as
+follows:
+
+```text
+Suzie,Bingham,A
+```
+
+Let's add a method to the `Student` class called `formatAsCSV()` to write the
+`Student` object in this comma-separated format!
+
+```java
+public String formatAsCSV() {
+    return String.format("%s,%s,%s", firstName, lastName, grade);
+}
+```
+
+Now let's see if we can write this out to a CSV file! We'll make use of a lot of
+the same code we used when we were writing out to a text file:
+
+```java
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class FileIOMain {
+    public static void main(String[] args) {
+        Student suzie = new Student("Suzie", "Bingham", 'A');
+        File file = new File("student.csv");
+
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(suzie.formatAsCSV());
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 }
 ```
 
-Beyond the private fields and the associated getter and setter methods you're
-used, we've added a couple of aspects to this basic class:
+Notice the minimal differences from the `FileIOMain` class we used previously.
+We are now writing to a file with the relative path of `student.csv`. If we
+run this program, we'll now see the `student.csv` file!
 
-- A custom constructor that allows us to pass all the values to initialize an
-  instance
-- A `toString()` method that returns a `String` representation of the values of
-  the object. The `toString()` method is called by default when a non-string
-  object is passed to the `System.out.println()` method
+![create-csv](https://curriculum-content.s3.amazonaws.com/java-mod-3/csv/create-csv-file.png)
 
-> Note: in the `toString()` method, we use the `StringBuffer` class to create a
-> string incrementally by appending values to it. The `StringBuffer` class is a
-> better class than the `String` class to build long strings because it does not
-> re-create a new object every time a value is appended, like the `String` class
-> does.
+## Reading from a CSV File
 
-So we can initialize an instance of `Person` and print its value to the console
-with the following code:
+Now we need to write the code that can read this file and create a `Student`
+instance from it. For this, let's create a new constructor that can create a
+`Student` object from the content in a CSV file.
 
 ```java
-    public static void main(String[] args) throws IOException {
-        Person testPerson = new Person("Soraya", "Rabots", 1990, 12, 19);
-        System.out.println(testPerson);
+public Student(String studentCSV) {
+    String[] studentProperties = studentCSV.split(",");
+    this.firstName = studentProperties[0];
+    this.lastName = studentProperties[1];
+    this.grade = studentProperties[2].charAt(0);
+}
+```
+
+Before we go any further, let's discuss what is happening in this constructor:
+
+- Since the content from the CSV is formatted with a comma as a delimiter, or
+  separator, we know we can split the `studentCSV` using the `,` as a delimiter.
+  - For example, if we have `Suzie,Bingham,A` as the value of `studentCSV`, if
+    we split it on the `,`, the `String` array would have the elements "Suzie",
+    "Bingham", and "A" in it.
+- We'll get the first name and last name by using the square brackets to access
+  the first two elements (indexes 0 and 1) from the `studentProperties` array.
+- Since the letter grade is a character, and we are only expecting one
+  character, we can just simply call the `charAt()` method and provide it the
+  parameter of `0` since it is assumed to be the only character.
+
+Now we'll write some code to read the CSV. This, again, will reuse most of the
+code we wrote to read a text file. To make our program a little more flexible,
+we'll also have the user pass in the file as a command-line argument:
+
+```java
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class FileIOMain {
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Please specify one file path as a command-line argument.");
+        } else {
+            File file = new File(args[0]);
+            try (Scanner reader = new Scanner(file)) {
+                while (reader.hasNextLine()) {
+                    Student student = new Student(reader.nextLine());
+                    System.out.println(student);
+                }
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
     }
+}
 ```
 
-This produces the following output:
+In the `while` loop, notice that instead of printing the content in the file,
+we pass in the content to the `Student` constructor that we just created. This
+will then parse the file appropriately to create a `Student` object. We'll then
+print out `student` to ensure that everything was created correctly. Let's pass
+in the `student.csv` file now through IntelliJ and run the code! The following
+is the output:
 
-```java
-firstName = Soraya
-lastName = Rabots
-Birth date = 12/19/1990
-```
-
-We want to be able to save the values of each field in this class in a file, and
-we will structure this file so that each field is separated with a comma.
-Consider the `testPerson` object we created above, it could be represented as
-follows:
-
-```
-Soraya,Rabots,1990,12,19
-```
-
-We can re-use our `writeToFile()` method from before, but we need to feed it a
-`String` that matches the format above. Let's create that method and call is
-`formatAsCSV()` in the `Person` class:
-
-```java
-    public String formatAsCSV() {
-        StringBuffer personString = new StringBuffer();
-        personString.append(firstName);
-        personString.append(",");
-        personString.append(lastName);
-        personString.append(",");
-        personString.append(birthYear);
-        personString.append(",");
-        personString.append(birthMonth);
-        personString.append(",");
-        personString.append(birthDay);
-
-        return personString.toString();
-    }
-```
-
-We can then use the `formatAsCSV()` method in our runner class:
-
-```java
-    public static void main(String[] args) throws IOException {
-        Person testPerson = new Person("Soraya", "Rabots", 1990, 12, 19);
-        System.out.println(testPerson);
-        String personCSV = testPerson.formatAsCSV();
-        writeToFile("person.csv", personCSV);
-    }
-```
-
-Which writes a file named `person.csv` with the following content:
-
-```
-Soraya,Rabots,1990,12,19
-```
-
-Now we need to write code that can read this file and create a Person object
-from it. For this, let's create a new constructor that can create a `Person`
-object from the string that is saved to the file. We will read that string from
-the file and pass it to the constructor to build a new instance.
-
-Let's look at the constructor first:
-
-```java
-    public Person(String personCSV) {
-        String[] personValues = personCSV.split(",");
-        this.firstName = personValues[0];
-        this.lastName = personValues[1];
-        this.birthYear = Integer.valueOf(personValues[2]);
-        this.birthMonth = Integer.valueOf(personValues[3]);
-        this.birthDay = Integer.valueOf(personValues[4]);
-        System.out.println("Initialized person object from CSV string");
-        System.out.println(this);
-    }
-```
-
-We use the `split()` method from the `String` class, which returns a `String`
-array of each value in the input string, based on the "separator" that is passed
-into the method. We can then use this array to set each property of the `Person`
-class.
-
-So now we can start our read from our file we saved earlier when we start our
-program:
-
-```java
-    public static void main(String[] args) throws IOException {
-
-        String personCSV = readFromFile("person.csv", false);
-        Person testPerson = new Person(personCSV);
-
-        // use the person object here...
-    }
+```text
+Suzie Bingham has the letter grade A
 ```
